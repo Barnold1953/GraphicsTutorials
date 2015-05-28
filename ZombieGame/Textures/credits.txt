@@ -1,0 +1,6 @@
+The following textures are from Seed of Andromeda:
+glass.png
+light_bricks.png
+red_bricks.png
+
+Artist: Andreas Ressl
