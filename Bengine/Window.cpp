@@ -15,6 +15,8 @@ namespace Bengine {
     int Window::create(std::string windowName, int screenWidth, int screenHeight, unsigned int currentFlags) {
 
         Uint32 flags = SDL_WINDOW_OPENGL;
+        _screenWidth = screenWidth;
+        _screenHeight = screenHeight;
 
         if (currentFlags & INVISIBLE) {
             flags |= SDL_WINDOW_HIDDEN;
