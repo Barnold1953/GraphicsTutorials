@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Box.h"
+#include "Player.h"
 #include <Bengine/IGameScreen.h>
 #include <Box2D/Box2D.h>
 #include <vector>
@@ -41,6 +42,7 @@ private:
     Bengine::GLTexture m_texture;
     Bengine::Window* m_window;
 
+    Player m_player;
     std::vector<Box> m_boxes;
     std::unique_ptr<b2World> m_world;
 };
