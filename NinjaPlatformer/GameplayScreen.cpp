@@ -5,6 +5,8 @@
 #include <Bengine/ResourceManager.h>
 #include <random>
 
+#include "Light.h"
+
 GameplayScreen::GameplayScreen(Bengine::Window* window) : m_window(window) {
 }
 
@@ -67,12 +69,18 @@ void GameplayScreen::onEntry() {
     m_spriteBatch.init();
 
     // Shader init
-    // Compile our color shader
+    // Compile our texture
     m_textureProgram.compileShaders("Shaders/textureShading.vert", "Shaders/textureShading.frag");
     m_textureProgram.addAttribute("vertexPosition");
     m_textureProgram.addAttribute("vertexColor");
     m_textureProgram.addAttribute("vertexUV");
     m_textureProgram.linkShaders();
+    // Compile our light shader
+    m_lightProgram.compileShaders("Shaders/lightShading.vert", "Shaders/lightShading.frag");
+    m_lightProgram.addAttribute("vertexPosition");
+    m_lightProgram.addAttribute("vertexColor");
+    m_lightProgram.addAttribute("vertexUV");
+    m_lightProgram.linkShaders();
 
     // Init camera
     m_camera.init(m_window->getScreenWidth(), m_window->getScreenHeight());
@@ -138,6 +146,38 @@ void GameplayScreen::draw() {
         m_debugRenderer.end();
         m_debugRenderer.render(projectionMatrix, 2.0f);
     }
+
+    // Render some test lights
+    // TODO: Don't hardcode this!
+    Light playerLight;
+    playerLight.color = Bengine::ColorRGBA8(255, 255, 255, 128);
+    playerLight.position = m_player.getPosition();
+    playerLight.size = 30.0f;
+
+    Light mouseLight;
+    mouseLight.color = Bengine::ColorRGBA8(255, 0, 255, 150);
+    mouseLight.position = m_camera.convertScreenToWorld(m_game->inputManager.getMouseCoords());
+    mouseLight.size = 45.0f;
+
+    m_lightProgram.use();
+    pUniform = m_textureProgram.getUniformLocation("P");
+    glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
+
+    // Additive blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    m_spriteBatch.begin();
+
+    playerLight.draw(m_spriteBatch);
+    mouseLight.draw(m_spriteBatch);
+
+    m_spriteBatch.end();
+    m_spriteBatch.renderBatch();
+
+    m_lightProgram.unuse();
+
+    // Reset to regular alpha blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void GameplayScreen::checkInput() {

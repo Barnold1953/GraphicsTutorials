@@ -87,6 +87,7 @@
     <ClInclude Include="Box.h" />
     <ClInclude Include="Capsule.h" />
     <ClInclude Include="GameplayScreen.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
