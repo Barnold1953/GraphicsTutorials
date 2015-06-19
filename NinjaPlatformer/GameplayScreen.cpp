@@ -50,7 +50,7 @@ void GameplayScreen::onEntry() {
     std::uniform_real_distribution<float> yPos(-10.0, 25.0f);
     std::uniform_real_distribution<float> size(0.5, 2.5f);
     std::uniform_int_distribution<int> color(50, 255);
-    const int NUM_BOXES = 100;
+    const int NUM_BOXES = 10;
 
     for (int i = 0; i < NUM_BOXES; i++) {
         Bengine::ColorRGBA8 randColor;

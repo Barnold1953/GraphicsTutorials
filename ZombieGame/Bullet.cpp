@@ -6,12 +6,11 @@
 #include "Zombie.h"
 #include "Level.h"
 
-Bullet::Bullet(glm::vec2 position, glm::vec2 direction, float damage, float speed, Grid* grid) :
+Bullet::Bullet(glm::vec2 position, glm::vec2 direction, float damage, float speed) :
     _position(position),
     _direction(direction),
     _damage(damage),
-    _speed(speed),
-    m_grid(grid) {
+    _speed(speed) {
     // Empty
 }
 

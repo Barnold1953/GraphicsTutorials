@@ -6,8 +6,6 @@
 
 #include "Bullet.h"
 
-class Grid;
-
 class Gun
 {
 public:
@@ -15,13 +13,13 @@ public:
         float spread, float bulletDamage, float bulletSpeed, Bengine::SoundEffect fireEffect);
     ~Gun();
 
-    void update(bool isMouseDown, const glm::vec2& position, const glm::vec2& direction, Grid* grid, float deltaTime);
+    void update(bool isMouseDown, const glm::vec2& position, const glm::vec2& direction, std::vector<Bullet>& bullets, float deltaTime);
 
 private:
 
     Bengine::SoundEffect m_fireEffect;
 
-    void fire(const glm::vec2& direction, const glm::vec2& position, Grid* grid);
+    void fire(const glm::vec2& direction, const glm::vec2& position, std::vector<Bullet>& bullets);
 
     std::string _name;
 

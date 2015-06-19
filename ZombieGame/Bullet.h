@@ -7,14 +7,13 @@
 class Human;
 class Zombie;
 class Agent;
-class Grid;
 
 const int BULLET_RADIUS = 5;
 
 class Bullet
 {
 public:
-    Bullet(glm::vec2 position, glm::vec2 direction, float damage, float speed, Grid* grid);
+    Bullet(glm::vec2 position, glm::vec2 direction, float damage, float speed);
     ~Bullet();
 
     // When update returns true, delete bullet
@@ -36,6 +35,5 @@ private:
     glm::vec2 _direction;
     float _damage;
     float _speed;
-    Grid* m_grid = nullptr;
 };
 

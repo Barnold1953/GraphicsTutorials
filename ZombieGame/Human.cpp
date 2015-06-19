@@ -14,13 +14,13 @@ Human::~Human()
 {
 }
 
-void Human::init(float speed, glm::vec2 pos, Grid* grid) {
+void Human::init(float speed, glm::vec2 pos) {
 
     static std::mt19937 randomEngine(time(nullptr));
     static std::uniform_real_distribution<float> randDir(-1.0f, 1.0f);
 
     _health = 20;
-    m_grid = grid;
+
     _color.r = 255;
     _color.g = 255;
     _color.b = 255;
@@ -39,6 +39,8 @@ void Human::init(float speed, glm::vec2 pos, Grid* grid) {
 }
 
 void Human::update(const std::vector<std::string>& levelData,
+                   std::vector<Human*>& humans,
+                   std::vector<Zombie*>& zombies,
                    float deltaTime) {
 
     static std::mt19937 randomEngine(time(nullptr));

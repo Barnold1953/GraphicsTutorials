@@ -13,12 +13,11 @@ Player::~Player() {
     // Empty
 }
 
-void Player::init(float speed, glm::vec2 pos, Bengine::InputManager* inputManager, Bengine::Camera2D* camera,
-                  Grid* grid) {
+void Player::init(float speed, glm::vec2 pos, Bengine::InputManager* inputManager, Bengine::Camera2D* camera, std::vector<Bullet>* bullets) {
     _speed = speed;
     _position = pos;
     _inputManager = inputManager;
-    m_grid = grid;
+    _bullets = bullets;
     _camera = camera;
     _color.r = 255;
     _color.g = 255;
@@ -39,6 +38,8 @@ void Player::addGun(Gun* gun) {
 }
 
 void Player::update(const std::vector<std::string>& levelData,
+                    std::vector<Human*>& humans,
+                    std::vector<Zombie*>& zombies,
                     float deltaTime) {
 
     if (_inputManager->isKeyDown(SDLK_w)) {
@@ -73,7 +74,7 @@ void Player::update(const std::vector<std::string>& levelData,
         _guns[_currentGunIndex]->update(_inputManager->isKeyDown(SDL_BUTTON_LEFT),
                                         centerPosition,
                                         m_direction,
-                                        m_grid,
+                                        *_bullets,
                                         deltaTime);
                                         
 

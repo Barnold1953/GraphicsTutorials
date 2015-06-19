@@ -13,7 +13,6 @@
 #include "Player.h"
 #include "Level.h"
 #include "Bullet.h"
-#include "Grid.h"
 
 class Zombie;
 
@@ -44,6 +43,12 @@ private:
     /// Main game loop for the program
     void gameLoop();
 
+    /// Updates all agents
+    void updateAgents(float deltaTime);
+
+    /// Updates all bullets
+    void updateBullets(float deltaTim);
+
     /// Checks the victory condition
     void checkVictory();
 
@@ -55,6 +60,9 @@ private:
 
     /// Draws the HUD
     void drawHud();
+
+    /// Adds blood to the particle engine
+    void addBlood(const glm::vec2& position, int numParticles);
 
     /// Member Variables
     Bengine::Window m_window; ///< The game window
@@ -82,7 +90,9 @@ private:
     int m_currentLevel;
 
     Player* m_player;
-    Grid m_grid;
+    std::vector<Human*> m_humans; ///< Vector of all humans
+    std::vector<Zombie*> m_zombies; ///< Vector of all zombies
+    std::vector<Bullet> m_bullets;
 
     int m_numHumansKilled; ///< Humans killed by player
     int m_numZombiesKilled; ///< Zombies killed by player
@@ -90,9 +100,6 @@ private:
     Bengine::SpriteFont* m_spriteFont;
 
     Bengine::AudioEngine m_audioEngine;
-
-    int m_totalZombies = 0;
-    int m_totalHumans = 0;
 
     GameState m_gameState;
 };

@@ -2,7 +2,6 @@
 #include <random>
 #include <ctime>
 #include <glm/gtx/rotate_vector.hpp>
-#include "Grid.h"
 
 
 Gun::Gun(std::string name, int fireRate, int bulletsPerShot,
@@ -23,16 +22,16 @@ Gun::~Gun() {
     // Empty
 }
 
-void Gun::update(bool isMouseDown, const glm::vec2& position, const glm::vec2& direction, Grid* grid, float deltaTime) {
+void Gun::update(bool isMouseDown, const glm::vec2& position, const glm::vec2& direction, std::vector<Bullet>& bullets, float deltaTime) {
     _frameCounter += 1.0f * deltaTime;
     // After a certain number of frames has passed we fire our gun
     if (_frameCounter >= _fireRate && isMouseDown) {
-        fire(direction, position, grid);
+        fire(direction, position, bullets);
         _frameCounter = 0;
     }
 }
 
-void Gun::fire(const glm::vec2& direction, const glm::vec2& position, Grid* grid) {
+void Gun::fire(const glm::vec2& direction, const glm::vec2& position, std::vector<Bullet>& bullets) {
 
     static std::mt19937 randomEngine(time(nullptr));
     // For offsetting the accuracy
@@ -42,10 +41,10 @@ void Gun::fire(const glm::vec2& direction, const glm::vec2& position, Grid* grid
 
     for (int i = 0; i < _bulletsPerShot; i++) {
         // Add a new bullet
-        grid->addBullet(position - glm::vec2(BULLET_RADIUS),
-                        glm::rotate(direction, randRotate(randomEngine)),
-                        _bulletDamage,
-                        _bulletSpeed);
+        bullets.emplace_back(position - glm::vec2(BULLET_RADIUS), 
+                             glm::rotate(direction, randRotate(randomEngine)),
+                             _bulletDamage, 
+                             _bulletSpeed);
     }   
 
 }
