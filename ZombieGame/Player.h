@@ -13,11 +13,13 @@ public:
     Player();
     ~Player();
 
-    void init(float speed, glm::vec2 pos, Bengine::InputManager* inputManager, Bengine::Camera2D* camera, Grid* grid);
+    void init(float speed, glm::vec2 pos, Bengine::InputManager* inputManager, Bengine::Camera2D* camera, std::vector<Bullet>* bullets);
 
     void addGun(Gun* gun);
 
     void update(const std::vector<std::string>& levelData,
+                std::vector<Human*>& humans,
+                std::vector<Zombie*>& zombies,
                 float deltaTime) override;
 private:
     Bengine::InputManager* _inputManager;
@@ -26,6 +28,7 @@ private:
     int _currentGunIndex;
 
     Bengine::Camera2D* _camera;
+    std::vector<Bullet>* _bullets;
 
 };
 

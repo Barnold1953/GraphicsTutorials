@@ -77,7 +77,6 @@
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Bullet.cpp" />
-    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Gun.cpp" />
     <ClCompile Include="Human.cpp" />
     <ClCompile Include="Level.cpp" />
@@ -89,7 +88,6 @@
   <ItemGroup>
     <ClInclude Include="Agent.h" />
     <ClInclude Include="Bullet.h" />
-    <ClInclude Include="Grid.h" />
     <ClInclude Include="Gun.h" />
     <ClInclude Include="Human.h" />
     <ClInclude Include="Level.h" />

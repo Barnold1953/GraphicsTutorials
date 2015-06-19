@@ -8,8 +8,6 @@ const float AGENT_RADIUS = AGENT_WIDTH / 2.0f;
 
 class Zombie;
 class Human;
-class Grid;
-class Cell;
 
 class Agent
 {
@@ -18,6 +16,8 @@ public:
     virtual ~Agent();
 
     virtual void update(const std::vector<std::string>& levelData,
+                        std::vector<Human*>& humans,
+                        std::vector<Zombie*>& zombies,
                         float deltaTime) = 0;
 
     bool collideWithLevel(const std::vector<std::string>& levelData);
@@ -46,6 +46,5 @@ protected:
     float _speed;
     float _health;
     GLuint m_textureID;
-    Grid* m_grid = nullptr;
 };
 
