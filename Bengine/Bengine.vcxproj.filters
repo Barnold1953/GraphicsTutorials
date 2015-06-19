@@ -152,6 +152,9 @@
     <ClInclude Include="DebugRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TileSheet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

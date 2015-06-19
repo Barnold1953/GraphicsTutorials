@@ -44,7 +44,7 @@ private:
     Bengine::Window* m_window;
     Bengine::DebugRenderer m_debugRenderer;
 
-    bool m_renderDebug = true;
+    bool m_renderDebug = false;
 
     Player m_player;
     std::vector<Box> m_boxes;
