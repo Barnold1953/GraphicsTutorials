@@ -12,6 +12,8 @@
 #include <Bengine/Window.h>
 #include <Bengine/DebugRenderer.h>
 
+#include <Bengine/GUI.h>
+
 // Our custom gameplay screen that inherits from the IGameScreen
 class GameplayScreen : public Bengine::IGameScreen {
 public:
@@ -44,6 +46,7 @@ private:
     Bengine::GLTexture m_texture;
     Bengine::Window* m_window;
     Bengine::DebugRenderer m_debugRenderer;
+    Bengine::GUI m_gui;
 
     bool m_renderDebug = false;
 
