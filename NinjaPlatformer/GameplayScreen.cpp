@@ -29,6 +29,7 @@ void GameplayScreen::destroy() {
 }
 
 void GameplayScreen::onEntry() {
+
     b2Vec2 gravity(0.0f, -25.0);
     m_world = std::make_unique<b2World>(gravity);
 
@@ -88,6 +89,13 @@ void GameplayScreen::onEntry() {
 
     // Init player
     m_player.init(m_world.get(), glm::vec2(0.0f, 30.0f), glm::vec2(2.0f), glm::vec2(1.0f, 1.8f), Bengine::ColorRGBA8(255, 255, 255, 255));
+
+    // Init the UI
+    m_gui.init("GUI");
+    m_gui.loadScheme("TaharezLook.scheme");
+    m_gui.setFont("DejaVuSans-10");
+    CEGUI::PushButton* testButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.5f, 0.5f, 0.1f, 0.05f), glm::vec4(0.0f), "TestButton"));
+    testButton->setText("Hello World!");
 }
 
 void GameplayScreen::onExit() {
@@ -178,6 +186,8 @@ void GameplayScreen::draw() {
 
     // Reset to regular alpha blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    m_gui.draw();
 }
 
 void GameplayScreen::checkInput() {

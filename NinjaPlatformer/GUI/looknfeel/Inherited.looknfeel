@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<!--
+This file shows the widget look inheritence mechanism in use.
+
+The basic mechanism allows that any named item in some widget look 'A' may be
+overridden in widget look 'B' that inherits 'A' by means of the "inherits"
+attribute.
+-->
+<Falagard version="7">
+    <WidgetLook name="Inheritence/Base">
+        <NamedArea name="inner_area">
+            <Area>
+                <Dim type="LeftEdge" ><AbsoluteDim value="50" /></Dim>
+                <Dim type="TopEdge" ><AbsoluteDim value="50" /></Dim>
+                <Dim type="RightEdge" ><UnifiedDim scale="1.0" offset="-50" type="RightEdge" /></Dim>
+                <Dim type="BottomEdge" ><UnifiedDim scale="1.0" offset="-50" type="BottomEdge" /></Dim>
+            </Area>
+        </NamedArea>
+        <ImagerySection name="outer">
+            <FrameComponent>
+                <Image component="TopLeftCorner" name="TaharezLook/StaticTopLeft" />
+                <Image component="TopRightCorner" name="TaharezLook/StaticTopRight" />
+                <Image component="BottomLeftCorner" name="TaharezLook/StaticBottomLeft" />
+                <Image component="BottomRightCorner" name="TaharezLook/StaticBottomRight" />
+                <Image component="LeftEdge" name="TaharezLook/StaticLeft" />
+                <Image component="RightEdge" name="TaharezLook/StaticRight" />
+                <Image component="TopEdge" name="TaharezLook/StaticTop" />
+                <Image component="BottomEdge" name="TaharezLook/StaticBottom" />
+                <Image component="Background" name="TaharezLook/StaticBackdrop" />
+            </FrameComponent>
+        </ImagerySection>
+        <ImagerySection name="inner">
+            <FrameComponent>
+                <Area>
+                    <NamedAreaSource name="inner_area"/>
+                </Area>
+                <Image component="TopLeftCorner" name="TaharezLook/StaticTopLeft" />
+                <Image component="TopRightCorner" name="TaharezLook/StaticTopRight" />
+                <Image component="BottomLeftCorner" name="TaharezLook/StaticBottomLeft" />
+                <Image component="BottomRightCorner" name="TaharezLook/StaticBottomRight" />
+                <Image component="LeftEdge" name="TaharezLook/StaticLeft" />
+                <Image component="RightEdge" name="TaharezLook/StaticRight" />
+                <Image component="TopEdge" name="TaharezLook/StaticTop" />
+                <Image component="BottomEdge" name="TaharezLook/StaticBottom" />
+                <Image component="Background" name="TaharezLook/StaticBackdrop" />
+            </FrameComponent>
+        </ImagerySection>
+        <StateImagery name="Enabled">
+            <Layer>
+                <Section section="outer" />
+                <Section section="inner" />
+            </Layer>
+        </StateImagery>
+    </WidgetLook>
+
+    <WidgetLook name="Inheritence/Derived1" inherits="Inheritence/Base">
+        <NamedArea name="inner_area">
+            <Area>
+                <Dim type="LeftEdge" ><AbsoluteDim value="10" /></Dim>
+                <Dim type="TopEdge" ><AbsoluteDim value="10" /></Dim>
+                <Dim type="RightEdge" ><UnifiedDim scale="1.0" offset="-50" type="RightEdge" /></Dim>
+                <Dim type="BottomEdge" ><UnifiedDim scale="1.0" offset="-50" type="BottomEdge" /></Dim>
+            </Area>
+        </NamedArea>
+    </WidgetLook>
+</Falagard>
+
