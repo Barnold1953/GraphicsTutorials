@@ -96,6 +96,12 @@ void GameplayScreen::onEntry() {
     m_gui.setFont("DejaVuSans-10");
     CEGUI::PushButton* testButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.5f, 0.5f, 0.1f, 0.05f), glm::vec4(0.0f), "TestButton"));
     testButton->setText("Hello World!");
+
+    CEGUI::Combobox* TestCombobox = static_cast<CEGUI::Combobox*>(m_gui.createWidget("TaharezLook/Combobox", glm::vec4(0.2f, 0.2f, 0.1f, 0.05f), glm::vec4(0.0f), "TestCombobox"));
+
+    m_gui.setMouseCursor("TaharezLook/MouseArrow");
+    m_gui.showMouseCursor();
+    SDL_ShowCursor(0);
 }
 
 void GameplayScreen::onExit() {
@@ -194,5 +200,6 @@ void GameplayScreen::checkInput() {
     SDL_Event evnt;
     while (SDL_PollEvent(&evnt)) {
         m_game->onSDLEvent(evnt);
+        m_gui.onSDLEvent(evnt);
     }
 }

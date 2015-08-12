@@ -3,6 +3,7 @@
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
 #include <glm/glm.hpp>
+#include <SDL/SDL_events.h>
 
 namespace Bengine {
     class GUI {
@@ -11,6 +12,13 @@ namespace Bengine {
         void destroy();
 
         void draw();
+        void update();
+
+        void setMouseCursor(const std::string& imageFile);
+        void showMouseCursor();
+        void hideMouseCursor();
+
+        void onSDLEvent(SDL_Event& evnt);
 
         void loadScheme(const std::string& schemeFile);
         void setFont(const std::string& fontFile);
@@ -24,5 +32,6 @@ namespace Bengine {
         static CEGUI::OpenGL3Renderer* m_renderer;
         CEGUI::GUIContext* m_context = nullptr;
         CEGUI::Window* m_root = nullptr;
+        unsigned int m_lastTime = 0;
     };
 }
