@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Box.h"
 #include "Player.h"
 #include <Bengine/IGameScreen.h>
-#include <Box2D/Box2D.h>
 #include <vector>
 #include <Bengine/SpriteBatch.h>
 #include <Bengine/GLSLProgram.h>
@@ -14,11 +12,10 @@
 
 #include <Bengine/GUI.h>
 
-// Our custom gameplay screen that inherits from the IGameScreen
-class GameplayScreen : public Bengine::IGameScreen {
+class MainMenuScreen : public Bengine::IGameScreen {
 public:
-    GameplayScreen(Bengine::Window* window);
-    ~GameplayScreen();
+    MainMenuScreen(Bengine::Window* window);
+    ~MainMenuScreen();
 
     virtual int getNextScreenIndex() const override;
 
@@ -40,21 +37,10 @@ private:
     void initUI();
     void checkInput();
 
+    bool onNewGameClicked(const CEGUI::EventArgs& e);
     bool onExitClicked(const CEGUI::EventArgs& e);
 
-    Bengine::SpriteBatch m_spriteBatch;
-    Bengine::GLSLProgram m_textureProgram;
-    Bengine::GLSLProgram m_lightProgram;
     Bengine::Camera2D m_camera;
-    Bengine::GLTexture m_texture;
     Bengine::Window* m_window;
-    Bengine::DebugRenderer m_debugRenderer;
     Bengine::GUI m_gui;
-
-    bool m_renderDebug = false;
-
-    Player m_player;
-    std::vector<Box> m_boxes;
-    std::unique_ptr<b2World> m_world;
 };
-
