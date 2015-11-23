@@ -1,5 +1,7 @@
 #include "GUI.h"
 
+#include <iostream>
+
 #include <SDL/SDL_timer.h>
 
 CEGUI::OpenGL3Renderer* Bengine::GUI::m_renderer = nullptr;
@@ -224,6 +226,13 @@ void Bengine::GUI::loadScheme(const std::string& schemeFile) {
 CEGUI::Window* Bengine::GUI::createWidget(const std::string& type, const glm::vec4& destRectPerc, const glm::vec4& destRectPix, const std::string& name /*= ""*/) {
     CEGUI::Window* newWindow = CEGUI::WindowManager::getSingleton().createWindow(type, name);
     m_root->addChild(newWindow);
+    setWidgetDestRect(newWindow, destRectPerc, destRectPix);
+    return newWindow;
+}
+
+CEGUI::Window* Bengine::GUI::createWidget(CEGUI::Window* parent, const std::string& type, const glm::vec4& destRectPerc, const glm::vec4& destRectPix, const std::string& name /*= ""*/) {
+    CEGUI::Window* newWindow = CEGUI::WindowManager::getSingleton().createWindow(type, name);
+    parent->addChild(newWindow);
     setWidgetDestRect(newWindow, destRectPerc, destRectPix);
     return newWindow;
 }
