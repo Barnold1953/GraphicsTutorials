@@ -105,6 +105,19 @@ glm::vec2 rotatePoint(const glm::vec2& pos, float angle) {
     return newv;
 }
 
+void Bengine::DebugRenderer::drawLine(const glm::vec2& a, const glm::vec2& b, const ColorRGBA8& color) {
+    int i = m_verts.size();
+    m_verts.resize(m_verts.size() + 2);
+
+    m_verts[i].position = a;
+    m_verts[i].color = color;
+    m_verts[i + 1].position = b;
+    m_verts[i + 1].color = color;
+
+    m_indices.push_back(i);
+    m_indices.push_back(i + 1);
+}
+
 void Bengine::DebugRenderer::drawBox(const glm::vec4& destRect, const ColorRGBA8& color, float angle) {
     
     int i = m_verts.size();

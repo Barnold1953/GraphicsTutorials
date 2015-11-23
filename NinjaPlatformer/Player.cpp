@@ -15,6 +15,10 @@ void Player::init(b2World* world,
     m_texture.init(texture, glm::ivec2(10, 2));
 }
 
+void Player::destroy(b2World* world) {
+    m_capsule.destroy(world);
+}
+
 void Player::draw(Bengine::SpriteBatch& spriteBatch) {
     glm::vec4 destRect;
     b2Body* body = m_capsule.getBody();

@@ -14,6 +14,7 @@ public:
               const glm::vec2& drawDims,
               glm::vec2& collisionDims,
               Bengine::ColorRGBA8 color);
+    void destroy(b2World* world);
 
     void draw(Bengine::SpriteBatch& spriteBatch);
     void drawDebug(Bengine::DebugRenderer& debugRenderer);

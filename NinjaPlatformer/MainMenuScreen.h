@@ -12,6 +12,8 @@
 
 #include <Bengine/GUI.h>
 
+#include "ScreenIndices.h"
+
 class MainMenuScreen : public Bengine::IGameScreen {
 public:
     MainMenuScreen(Bengine::Window* window);
@@ -38,8 +40,10 @@ private:
     void checkInput();
 
     bool onNewGameClicked(const CEGUI::EventArgs& e);
+    bool onEditorClicked(const CEGUI::EventArgs& e);
     bool onExitClicked(const CEGUI::EventArgs& e);
 
+    int m_nextScreenIndex = SCREEN_INDEX_GAMEPLAY;
     Bengine::Camera2D m_camera;
     Bengine::Window* m_window;
     Bengine::GUI m_gui;

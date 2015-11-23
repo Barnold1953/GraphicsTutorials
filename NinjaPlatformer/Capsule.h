@@ -12,6 +12,7 @@ public:
               float density,
               float friction,
               bool fixedRotation);
+    void destroy(b2World* world);
 
     void drawDebug(Bengine::DebugRenderer& debugRenderer);
 

@@ -43,6 +43,13 @@ void Capsule::init(b2World* world,
     m_fixtures[1] = m_body->CreateFixture(&circleDef);
 }
 
+void Capsule::destroy(b2World* world) {
+    if (m_body) {
+        world->DestroyBody(m_body);
+        m_body = nullptr;
+    }
+}
+
 void Capsule::drawDebug(Bengine::DebugRenderer& debugRenderer) {
     Bengine::ColorRGBA8 color(255, 255, 255, 255);
     // Draw box

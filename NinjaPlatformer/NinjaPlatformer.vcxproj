@@ -78,6 +78,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Capsule.cpp" />
+    <ClCompile Include="EditorScreen.cpp" />
     <ClCompile Include="GameplayScreen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenuScreen.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Capsule.h" />
+    <ClInclude Include="EditorScreen.h" />
     <ClInclude Include="GameplayScreen.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="MainMenuScreen.h" />

@@ -12,7 +12,6 @@ namespace Bengine {
     {
     }
 
-
     Camera2D::~Camera2D()
     {
     }

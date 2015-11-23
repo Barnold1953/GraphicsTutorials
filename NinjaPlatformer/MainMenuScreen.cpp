@@ -1,7 +1,5 @@
 #include "MainMenuScreen.h"
 
-#include "ScreenIndices.h"
-
 MainMenuScreen::MainMenuScreen(Bengine::Window* window) : m_window(window) {
     m_screenIndex = SCREEN_INDEX_MAINMENU;
 }
@@ -10,7 +8,7 @@ MainMenuScreen::~MainMenuScreen() {
 }
 
 int MainMenuScreen::getNextScreenIndex() const {
-    return SCREEN_INDEX_GAMEPLAY;
+    return m_nextScreenIndex;
 }
 
 int MainMenuScreen::getPreviousScreenIndex() const {
@@ -60,7 +58,12 @@ void MainMenuScreen::initUI() {
     // Set up event to be called when we click
     playGameButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MainMenuScreen::onNewGameClicked, this));
 
-    CEGUI::PushButton* exitButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.45f, 0.60f, 0.1f, 0.05f), glm::vec4(0.0f), "ExitButton"));
+    CEGUI::PushButton* editorButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.45f, 0.56f, 0.1f, 0.05f), glm::vec4(0.0f), "EditorButton"));
+    editorButton->setText("Level Editor");
+    // Set up event to be called when we click
+    editorButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MainMenuScreen::onEditorClicked, this));
+
+    CEGUI::PushButton* exitButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.45f, 0.62f, 0.1f, 0.05f), glm::vec4(0.0f), "ExitButton"));
     exitButton->setText("Exit Game");
     // Set the event to be called when we click
     exitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MainMenuScreen::onExitClicked, this));
@@ -74,10 +77,22 @@ void MainMenuScreen::checkInput() {
     SDL_Event evnt;
     while (SDL_PollEvent(&evnt)) {
         m_gui.onSDLEvent(evnt);
+        switch (evnt.type) {
+            case SDL_QUIT:
+                onExitClicked(CEGUI::EventArgs());
+                break;
+        }
     }
 }
 
 bool MainMenuScreen::onNewGameClicked(const CEGUI::EventArgs& e) {
+    m_nextScreenIndex = SCREEN_INDEX_GAMEPLAY;
+    m_currentState = Bengine::ScreenState::CHANGE_NEXT;
+    return true;
+}
+
+bool MainMenuScreen::onEditorClicked(const CEGUI::EventArgs& e) {
+    m_nextScreenIndex = SCREEN_INDEX_EDITOR;
     m_currentState = Bengine::ScreenState::CHANGE_NEXT;
     return true;
 }
