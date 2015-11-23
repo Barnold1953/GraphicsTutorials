@@ -136,6 +136,18 @@ void EditorScreen::update() {
             m_aSlider->setCurrentValue(m_aSlider->getCurrentValue() + ALPHA_SPEED);
         }
     }
+
+    // Check for deleting an object
+    if (m_inputManager.isKeyPressed(SDLK_DELETE)) {
+        if (m_selectedLight != NO_LIGHT) {
+            m_lights.erase(m_lights.begin() + m_selectedLight);
+            m_selectedLight = NO_LIGHT;
+        } else if (m_selectedBox != NO_BOX) {
+            m_boxes[m_selectedBox].destroy(m_world.get());
+            m_boxes.erase(m_boxes.begin() + m_selectedBox);
+            m_selectedBox = NO_BOX;
+        }
+    }
 }
 
 void EditorScreen::draw() {
@@ -162,7 +174,7 @@ void EditorScreen::drawUI() {
             // Make temporary light to render
             Light tmpLight;
             tmpLight.position = pos;
-            tmpLight.color = Bengine::ColorRGBA8(m_colorPickerRed, m_colorPickerGreen, m_colorPickerBlue, m_colorPickerAlpha);
+            tmpLight.color = Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, (GLubyte)m_colorPickerAlpha);
             tmpLight.size = m_lightSize;
 
             // Draw light
@@ -227,7 +239,7 @@ void EditorScreen::drawUI() {
         // Sorry for this
         destRect.x = m_aSlider->getXPosition().d_scale * m_window->getScreenWidth() + 10.0f - m_window->getScreenWidth() / 2.0f + QUAD_SIZE / 2.0f;
         destRect.y = m_window->getScreenHeight() / 2.0f - m_aSlider->getYPosition().d_scale * m_window->getScreenHeight() -
-            m_aSlider->getHeight().d_scale * m_window->getScreenHeight() * 0.5 - QUAD_SIZE / 4.0f;
+            m_aSlider->getHeight().d_scale * m_window->getScreenHeight() * 0.5f - QUAD_SIZE / 4.0f;
         destRect.z = QUAD_SIZE;
         destRect.w = QUAD_SIZE;
         m_spriteBatch.draw(destRect, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), m_blankTexture.id, 0.0f, Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 255));
@@ -239,10 +251,10 @@ void EditorScreen::drawUI() {
         } else {
             colorText = "RGB[" + std::to_string((int)m_colorPickerRed) + "," + std::to_string((int)m_colorPickerGreen) + "," + std::to_string((int)m_colorPickerBlue) + "]";
         }
-        m_spriteFont.draw(m_spriteBatch, colorText.c_str(), glm::vec2(destRect.x + destRect.z * 0.5, destRect.y + destRect.w), glm::vec2(0.55), 0.0f, Bengine::ColorRGBA8(255, 255, 255, 255), Bengine::Justification::MIDDLE);
+        m_spriteFont.draw(m_spriteBatch, colorText.c_str(), glm::vec2(destRect.x + destRect.z * 0.5f, destRect.y + destRect.w), glm::vec2(0.55f), 0.0f, Bengine::ColorRGBA8(255, 255, 255, 255), Bengine::Justification::MIDDLE);
     }
 
-    // Draw custon labels for widgets
+    // Draw custom labels for widgets
     for (auto& l : m_widgetLabels) l.draw(m_spriteBatch, m_spriteFont, m_window);
 
     m_spriteBatch.end();
@@ -264,7 +276,6 @@ void EditorScreen::drawWorld() {
     glm::mat4 projectionMatrix = m_camera.getCameraMatrix();
     GLint pUniform = m_textureProgram.getUniformLocation("P");
     glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
-
 
     { // Draw all the boxes and the player
         m_spriteBatch.begin();
@@ -528,6 +539,9 @@ void EditorScreen::initUI() {
 
 void EditorScreen::checkInput() {
     SDL_Event evnt;
+
+    m_inputManager.update();
+
     while (SDL_PollEvent(&evnt)) {
         m_gui.onSDLEvent(evnt);
         switch (evnt.type) {
@@ -555,8 +569,6 @@ void EditorScreen::checkInput() {
                 break;
         }
     }
-
-    m_inputManager.update();
 }
 
 bool inLightSelect(const Light& l, const glm::vec2& pos) {
@@ -582,7 +594,8 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
             if (m_selectedLight != NO_LIGHT && inLightSelect(m_lights[m_selectedLight], pos)) {
                 // We selected ourself, do nothing.
             } else {
-                // Unselect9
+                // Unselect
+                m_selectedLight = NO_LIGHT;
                 // Find the box that we are selecting
                 for (size_t i = 0; i < m_lights.size(); i++) {
                     if (inLightSelect(m_lights[i], pos)) {
@@ -597,6 +610,12 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
                 m_selectOffset = pos - m_lights[m_selectedLight].position;
                 m_selectedBox = NO_LIGHT;
                 m_isDragging = true;
+                // Set variables first so refreshing the controls works
+                m_colorPickerRed = m_lights[m_selectedLight].color.r;
+                m_colorPickerGreen = m_lights[m_selectedLight].color.g;
+                m_colorPickerBlue = m_lights[m_selectedLight].color.b;
+                m_colorPickerAlpha = m_lights[m_selectedLight].color.a;
+                m_lightSize = m_lights[m_selectedLight].size;
                 // Set widget values
                 m_rSlider->setCurrentValue(m_lights[m_selectedLight].color.r);
                 m_gSlider->setCurrentValue(m_lights[m_selectedLight].color.g);
@@ -626,6 +645,13 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
                 // Get the offset from the center so we can drag correctly
                 m_selectOffset = pos - m_boxes[m_selectedBox].getPosition();
                 m_isDragging = true;
+                // Set variables first so refreshing the controls works
+                m_rotation = m_boxes[m_selectedBox].getBody()->GetAngle();
+                m_boxDims.x = m_boxes[m_selectedBox].getDimensions().x;
+                m_boxDims.y = m_boxes[m_selectedBox].getDimensions().y;
+                m_colorPickerRed = m_boxes[m_selectedBox].getColor().r;
+                m_colorPickerGreen = m_boxes[m_selectedBox].getColor().g;
+                m_colorPickerBlue = m_boxes[m_selectedBox].getColor().b;
                 // Set widget values
                 m_rotationSpinner->setCurrentValue(m_boxes[m_selectedBox].getBody()->GetAngle());
                 m_widthSpinner->setCurrentValue(m_boxes[m_selectedBox].getDimensions().x);
@@ -655,7 +681,7 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
                 uvRect.y = pos.y;
                 uvRect.z = m_boxDims.x;
                 uvRect.w = m_boxDims.y;
-                newBox.init(m_world.get(), pos, m_boxDims, texture, Bengine::ColorRGBA8(m_colorPickerRed, m_colorPickerGreen, m_colorPickerBlue, 255),
+                newBox.init(m_world.get(), pos, m_boxDims, texture, Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 255),
                             false, m_physicsMode == PhysicsMode::DYNAMIC, m_rotation, uvRect);
                 m_boxes.push_back(newBox);
                 break;
@@ -664,13 +690,13 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
                 m_player.destroy(m_world.get());
                 // Re-init the player
                 pos = m_camera.convertScreenToWorld(glm::vec2(evnt.button.x, evnt.button.y));
-                m_player.init(m_world.get(), pos, glm::vec2(2.0f), glm::vec2(1.0f, 1.8f), Bengine::ColorRGBA8(m_colorPickerRed, m_colorPickerGreen, m_colorPickerBlue, 255));
+                m_player.init(m_world.get(), pos, glm::vec2(2.0f), glm::vec2(1.0f, 1.8f), Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 255));
                 m_hasPlayer = true;
                 break;
             case ObjectMode::LIGHT:
                 newLight.position = m_camera.convertScreenToWorld(glm::vec2(evnt.button.x, evnt.button.y));
                 newLight.size = m_lightSize;
-                newLight.color = Bengine::ColorRGBA8(m_colorPickerRed, m_colorPickerGreen, m_colorPickerBlue, m_colorPickerAlpha);
+                newLight.color = Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, (GLubyte)m_colorPickerAlpha);
                 m_lights.push_back(newLight);
                 break;
             case ObjectMode::FINISH:
@@ -735,7 +761,7 @@ void EditorScreen::refreshSelectedBox(const glm::vec2& newPosition) {
     uvRect.w = m_boxDims.y;
     Box newBox;
 
-    newBox.init(m_world.get(), newPosition, m_boxDims, texture, Bengine::ColorRGBA8(m_colorPickerRed, m_colorPickerGreen, m_colorPickerBlue, 255),
+    newBox.init(m_world.get(), newPosition, m_boxDims, texture, Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 255),
                 false, m_physicsMode == PhysicsMode::DYNAMIC, m_rotation, uvRect);
     // Destroy old box and replace with new one
     m_boxes[m_selectedBox].destroy(m_world.get());
@@ -752,7 +778,7 @@ void EditorScreen::refreshSelectedLight(const glm::vec2& newPosition) {
     Light newLight;
     newLight.position = newPosition;
     newLight.size = m_lightSize;
-    newLight.color = Bengine::ColorRGBA8(m_colorPickerRed, m_colorPickerGreen, m_colorPickerBlue, m_colorPickerAlpha);
+    newLight.color = Bengine::ColorRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, (GLubyte)m_colorPickerAlpha);
     m_lights[m_selectedLight] = newLight;
 }
 
@@ -760,8 +786,8 @@ void EditorScreen::refreshSelectedLight(const glm::vec2& newPosition) {
 bool EditorScreen::isMouseInUI() {
     int x, y;
     SDL_GetMouseState(&x, &y);
-    const float SW = m_window->getScreenWidth();
-    const float SH = m_window->getScreenHeight();
+    const float SW = (float)m_window->getScreenWidth();
+    const float SH = (float)m_window->getScreenHeight();
     // Notice we aren't converting to world space, we are staying in screen space because UI.
     return (x >= m_groupBox->getXPosition().d_scale * SW && x <= m_groupBox->getXPosition().d_scale * SW + m_groupBox->getWidth().d_scale  * SW &&
             y >= m_groupBox->getYPosition().d_scale * SH && y <= m_groupBox->getYPosition().d_scale * SH + m_groupBox->getHeight().d_scale * SH);
@@ -862,6 +888,11 @@ bool EditorScreen::onPlaceMouseClick(const CEGUI::EventArgs& e) {
     m_selectMode = SelectionMode::PLACE;
     m_selectedBox = NO_BOX;
     m_selectedLight = NO_LIGHT;
+    if (m_objectMode == ObjectMode::LIGHT) {
+        setLightWidgetVisibility(true);
+    } else if (m_objectMode == ObjectMode::PLATFORM) {
+        setPlatformWidgetVisibility(true);
+    }
     return true;
 }
 
@@ -876,25 +907,25 @@ bool EditorScreen::onBackMouseClick(const CEGUI::EventArgs& e) {
 }
 
 bool EditorScreen::onRotationValueChange(const CEGUI::EventArgs& e) {
-    m_rotation = m_rotationSpinner->getCurrentValue();
+    m_rotation = (float)m_rotationSpinner->getCurrentValue();
     refreshSelectedBox();
     return true;
 }
 
 bool EditorScreen::onSizeValueChange(const CEGUI::EventArgs& e) {
-    m_lightSize = m_sizeSpinner->getCurrentValue();
+    m_lightSize = (float)m_sizeSpinner->getCurrentValue();
     refreshSelectedLight();
     return true;
 }
 
 bool EditorScreen::onWidthValueChange(const CEGUI::EventArgs& e) {
-    m_boxDims.x = m_widthSpinner->getCurrentValue();
+    m_boxDims.x = (float)m_widthSpinner->getCurrentValue();
     refreshSelectedBox();
     return true;
 }
 
 bool EditorScreen::onHeightValueChange(const CEGUI::EventArgs& e) {
-    m_boxDims.y = m_heightSpinner->getCurrentValue();
+    m_boxDims.y = (float)m_heightSpinner->getCurrentValue();
     refreshSelectedBox();
     return true;
 }
