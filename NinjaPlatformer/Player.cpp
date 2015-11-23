@@ -125,7 +125,7 @@ void Player::update(Bengine::InputManager& inputManager) {
         body->ApplyForceToCenter(b2Vec2(100.0, 0.0), true);
         m_direction = 1;
     } else {
-        body->SetLinearVelocity(b2Vec2(body->GetLinearVelocity().x * 0.95, body->GetLinearVelocity().y));
+        body->SetLinearVelocity(b2Vec2(body->GetLinearVelocity().x * 0.95f, body->GetLinearVelocity().y));
     }
 
     // Check for punch

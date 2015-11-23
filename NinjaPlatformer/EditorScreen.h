@@ -50,7 +50,7 @@ public:
     CEGUI::Window* widget = nullptr;
     std::string text = "";
     Bengine::ColorRGBA8 color = Bengine::ColorRGBA8(255, 255, 255, 255);
-    float scale = 0.7;
+    float scale = 0.7f;
 };
 
 class EditorScreen : public Bengine::IGameScreen {
