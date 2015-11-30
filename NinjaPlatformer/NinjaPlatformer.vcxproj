@@ -80,6 +80,7 @@
     <ClCompile Include="Capsule.cpp" />
     <ClCompile Include="EditorScreen.cpp" />
     <ClCompile Include="GameplayScreen.cpp" />
+    <ClCompile Include="LevelReaderWriter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenuScreen.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="Capsule.h" />
     <ClInclude Include="EditorScreen.h" />
     <ClInclude Include="GameplayScreen.h" />
+    <ClInclude Include="LevelReaderWriter.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="MainMenuScreen.h" />
     <ClInclude Include="Player.h" />

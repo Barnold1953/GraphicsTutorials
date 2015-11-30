@@ -74,6 +74,8 @@ private:
     void drawUI();
     void drawWorld();
 
+    void clearLevel();
+
     void initUI();
     void checkInput();
     void updateMouseDown(const SDL_Event& evnt);
@@ -105,12 +107,17 @@ private:
     bool onSelectMouseClick(const CEGUI::EventArgs& e);
     bool onPlaceMouseClick(const CEGUI::EventArgs& e);
     bool onSaveMouseClick(const CEGUI::EventArgs& e);
+    bool onLoadMouseClick(const CEGUI::EventArgs& e);
     bool onBackMouseClick(const CEGUI::EventArgs& e);
     bool onRotationValueChange(const CEGUI::EventArgs& e);
     bool onSizeValueChange(const CEGUI::EventArgs& e);
     bool onWidthValueChange(const CEGUI::EventArgs& e);
     bool onHeightValueChange(const CEGUI::EventArgs& e);
     bool onDebugToggleClick(const CEGUI::EventArgs& e);
+    bool onSaveCancelClick(const CEGUI::EventArgs& e);
+    bool onSave(const CEGUI::EventArgs& e);
+    bool onLoadCancelClick(const CEGUI::EventArgs& e);
+    bool onLoad(const CEGUI::EventArgs& e);
     
     /************************************************************************/
     /* Member Variables                                                     */
@@ -143,6 +150,17 @@ private:
     CEGUI::Spinner* m_widthSpinner = nullptr;
     CEGUI::Spinner* m_heightSpinner = nullptr;
     CEGUI::Spinner* m_sizeSpinner = nullptr;
+    CEGUI::FrameWindow* m_saveWindow = nullptr;
+    CEGUI::PushButton* m_saveWindowSaveButton = nullptr;
+    CEGUI::Combobox* m_saveWindowCombobox = nullptr;
+    CEGUI::FrameWindow* m_loadWindow = nullptr;
+    CEGUI::PushButton* m_loadWindowLoadButton = nullptr;
+    CEGUI::Combobox* m_loadWindowCombobox = nullptr;
+    std::vector<CEGUI::ListboxTextItem*> m_saveListBoxItems;
+    std::vector<CEGUI::ListboxTextItem*> m_loadListBoxItems;
+    CEGUI::PushButton* m_saveButton = nullptr;
+    CEGUI::PushButton* m_loadButton = nullptr;
+    CEGUI::PushButton* m_backButton = nullptr;
     std::vector<WidgetLabel> m_widgetLabels;
 
     Bengine::SpriteBatch m_spriteBatch;

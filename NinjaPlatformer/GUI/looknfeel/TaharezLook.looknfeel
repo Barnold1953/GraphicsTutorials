@@ -2691,7 +2691,7 @@
     ***************************************************
     -->
     <WidgetLook name="TaharezLook/Tooltip">
-        <Property name="Alpha" value="0" />
+        <Property name="Alpha" value="0.33" />
         <Property name="Size" value="{{0, 128}, {0, 32}}" />
         <NamedArea name="TextArea">
             <Area>

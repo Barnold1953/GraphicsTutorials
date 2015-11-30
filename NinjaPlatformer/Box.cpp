@@ -21,6 +21,9 @@ void Box::init(b2World* world,
     m_color = color;
     m_texture = texture;
     m_uvRect = uvRect;
+    m_fixedRotation = fixedRotation;
+    m_isDynamic = isDynamic;
+
     // Make the body
     b2BodyDef bodyDef;
     if (isDynamic) {

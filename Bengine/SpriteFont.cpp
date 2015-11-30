@@ -19,6 +19,14 @@ int closestPow2(int i) {
 namespace Bengine {
 
     SpriteFont::SpriteFont(const char* font, int size, char cs, char ce) {
+        init(font, size, cs, ce);
+    }
+
+    void SpriteFont::init(const char* font, int size) {
+        init(font, size, FIRST_PRINTABLE_CHAR, LAST_PRINTABLE_CHAR);
+    }
+
+    void SpriteFont::init(const char* font, int size, char cs, char ce) {
         // Initialize SDL_ttf
         if (!TTF_WasInit()) {
             TTF_Init();
@@ -160,6 +168,7 @@ namespace Bengine {
         delete[] bestPartition;
         TTF_CloseFont(f);
     }
+
     void SpriteFont::dispose() {
         if (_texID != 0) {
             glDeleteTextures(1, &_texID);

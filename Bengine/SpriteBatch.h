@@ -55,6 +55,7 @@ public:
 
     // Initializes the spritebatch
     void init();
+    void dispose();
 
     // Begins the spritebatch
     void begin(GlyphSortType sortType = GlyphSortType::TEXTURE);

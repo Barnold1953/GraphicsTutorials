@@ -80,6 +80,17 @@ void SpriteBatch::init() {
     createVertexArray();
 }
 
+void SpriteBatch::dispose() {
+    if (_vao != 0) {
+        glDeleteVertexArrays(1, &_vao);
+        _vao = 0;
+    }
+    if (_vbo != 0) {
+        glDeleteBuffers(1, &_vbo);
+        _vbo = 0;
+    }
+}
+
 void SpriteBatch::begin(GlyphSortType sortType /* GlyphSortType::TEXTURE */) {
     _sortType = sortType;
     _renderBatches.clear();

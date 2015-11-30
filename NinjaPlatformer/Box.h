@@ -29,11 +29,17 @@ public:
     // Test if a point is inside the box
     bool testPoint(float x, float y) const { return m_fixture->TestPoint(b2Vec2(x, y)); }
 
-    b2Body* getBody() const { return m_body; }
-    b2Fixture* getFixture() const { return m_fixture; }
-    const glm::vec2& getDimensions() const { return m_dimensions; }
-    glm::vec2 getPosition() const { return glm::vec2(m_body->GetPosition().x, m_body->GetPosition().y); }
-    const Bengine::ColorRGBA8& getColor() const { return m_color; }
+    // Beautiful accessors
+    b2Body*                    getBody()          const { return m_body; }
+    b2Fixture*                 getFixture()       const { return m_fixture; }
+    const glm::vec2&           getDimensions()    const { return m_dimensions; }
+    glm::vec2                  getPosition()      const { return glm::vec2(m_body->GetPosition().x, m_body->GetPosition().y); }
+    glm::vec4                  getUvRect()        const { return m_uvRect; }
+    const Bengine::ColorRGBA8& getColor()         const { return m_color; }
+    float                      getAngle()         const { return m_body->GetAngle(); }
+    const Bengine::GLTexture&  getTexture()       const { return m_texture; }
+    const bool&                getFixedRotation() const { return m_fixedRotation; }
+    const bool&                getIsDynamic()     const { return m_isDynamic; }
 private:
     glm::vec4 m_uvRect;
     b2Body* m_body = nullptr;
@@ -41,5 +47,7 @@ private:
     glm::vec2 m_dimensions;
     Bengine::ColorRGBA8 m_color;
     Bengine::GLTexture m_texture;
+    bool m_fixedRotation;
+    bool m_isDynamic;
 };
 
