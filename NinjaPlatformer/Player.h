@@ -30,8 +30,13 @@ public:
         return rv;
     }
 
+    const glm::vec2& getDrawDims() const { return m_drawDims; }
+    const glm::vec2& getCollisionDims() const { return m_collisionDims; }
+    const Bengine::ColorRGBA8& getColor() const { return m_color; }
+
 private:
     glm::vec2 m_drawDims;
+    glm::vec2 m_collisionDims;
     Bengine::ColorRGBA8 m_color;
     Bengine::TileSheet m_texture;
     Capsule m_capsule;

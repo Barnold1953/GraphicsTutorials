@@ -1,10 +1,15 @@
 #include "EditorScreen.h"
 
+#include <iostream>
 #include <Bengine/ResourceManager.h>
+#include <Bengine/IOManager.h>
+#include "LevelReaderWriter.h"
 
 const int MOUSE_LEFT = 0;
 const int MOUSE_RIGHT = 1;
 const float LIGHT_SELECT_RADIUS = 0.5f;
+
+const b2Vec2 GRAVITY(0.0f, -25.0);
 
 void WidgetLabel::draw(Bengine::SpriteBatch& sb, Bengine::SpriteFont& sf, Bengine::Window* w) {
     if (!widget->isVisible()) return;
@@ -16,8 +21,7 @@ void WidgetLabel::draw(Bengine::SpriteBatch& sb, Bengine::SpriteFont& sf, Bengin
 }
 
 EditorScreen::EditorScreen(Bengine::Window* window) :
-m_window(window),
-m_spriteFont("Fonts/chintzy.ttf", 32) {
+m_window(window) {
     m_screenIndex = SCREEN_INDEX_EDITOR;
 }
 
@@ -41,6 +45,8 @@ void EditorScreen::destroy() {
 }
 
 void EditorScreen::onEntry() {
+    m_spriteFont.init("Fonts/chintzy.ttf", 32);
+
     m_mouseButtons[MOUSE_LEFT] = false;
     m_mouseButtons[MOUSE_RIGHT] = false;
     // Init camera
@@ -56,8 +62,7 @@ void EditorScreen::onEntry() {
     m_spriteBatch.init();
 
     // Set up box2D stuff
-    b2Vec2 gravity(0.0f, -25.0);
-    m_world = std::make_unique<b2World>(gravity);
+    m_world = std::make_unique<b2World>(GRAVITY);
 
     // Shader init
     // Compile our texture shader
@@ -77,11 +82,27 @@ void EditorScreen::onEntry() {
 }
 
 void EditorScreen::onExit() {
-    m_gui.destroy();
+
+    for (auto& item : m_saveListBoxItems) {
+        // We don't have to call delete since removeItem does it for us
+        m_saveWindowCombobox->removeItem(item);
+    }
+    m_saveListBoxItems.clear();
+    for (auto& item : m_loadListBoxItems) {
+        // We don't have to call delete since removeItem does it for us
+        m_loadWindowCombobox->removeItem(item);
+    }
+    m_loadListBoxItems.clear();
+
     m_textureProgram.dispose();
     m_spriteFont.dispose();
+    m_spriteBatch.dispose();
     m_widgetLabels.clear();
+
+    clearLevel();
     m_world.reset();
+
+    m_gui.destroy();
 }
 
 void EditorScreen::update() {
@@ -148,6 +169,8 @@ void EditorScreen::update() {
             m_selectedBox = NO_BOX;
         }
     }
+
+    m_gui.update();
 }
 
 void EditorScreen::draw() {
@@ -260,7 +283,7 @@ void EditorScreen::drawUI() {
     m_spriteBatch.end();
     m_spriteBatch.renderBatch();
     m_textureProgram.unuse();
-
+    
     m_gui.draw();
 }
 
@@ -347,6 +370,14 @@ void EditorScreen::drawWorld() {
     }
 }
 
+void EditorScreen::clearLevel() {
+    m_boxes.clear();
+    m_lights.clear();
+    m_hasPlayer = false;
+    m_world.reset();
+    m_world = std::make_unique<b2World>(GRAVITY);
+}
+
 void EditorScreen::initUI() {
     // Init the UI
     m_gui.init("GUI");
@@ -354,7 +385,7 @@ void EditorScreen::initUI() {
     m_gui.setFont("DejaVuSans-10");
 
     // Add group box back panel
-    m_groupBox = static_cast<CEGUI::GroupBox*>(m_gui.createWidget("TaharezLook/GroupBox", glm::vec4(0.001f, 0.0f, 0.18f, 0.67f), glm::vec4(0.0f), "GroupBox"));
+    m_groupBox = static_cast<CEGUI::GroupBox*>(m_gui.createWidget("TaharezLook/GroupBox", glm::vec4(0.001f, 0.0f, 0.18f, 0.72f), glm::vec4(0.0f), "GroupBox"));
     // Group box should be behind everything.
     m_groupBox->setAlwaysOnTop(false);
     m_groupBox->moveToBack();
@@ -518,16 +549,56 @@ void EditorScreen::initUI() {
          m_debugRender = false;
 
          m_selectMode = SelectionMode::SELECT;
-     }
+    }
 
     { // Add save and back buttons
-        CEGUI::PushButton* saveButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.03f, 0.5f, 0.1f, 0.05f), glm::vec4(0.0f), "SaveButton"));
-        saveButton->setText("Save");
-        saveButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onSaveMouseClick, this));
+        m_saveButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.03f, 0.5f, 0.1f, 0.05f), glm::vec4(0.0f), "SaveButton"));
+        m_saveButton->setText("Save");
+        m_saveButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onSaveMouseClick, this));
 
-        CEGUI::PushButton* backButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.03f, 0.57f, 0.1f, 0.05f), glm::vec4(0.0f), "BackButton"));
-        backButton->setText("Back");
-        backButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onBackMouseClick, this));
+        m_saveButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.03f, 0.57f, 0.1f, 0.05f), glm::vec4(0.0f), "LoadButton"));
+        m_saveButton->setText("Load");
+        m_saveButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onLoadMouseClick, this));
+
+        m_backButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget("TaharezLook/Button", glm::vec4(0.03f, 0.64f, 0.1f, 0.05f), glm::vec4(0.0f), "BackButton"));
+        m_backButton->setText("Back");
+        m_backButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onBackMouseClick, this));
+    }
+
+    { // Add save window widgets
+        m_saveWindow = static_cast<CEGUI::FrameWindow*>(m_gui.createWidget("TaharezLook/FrameWindow", glm::vec4(0.3f, 0.3f, 0.4f, 0.4f), glm::vec4(0.0f), "SaveWindow"));
+        m_saveWindow->subscribeEvent(CEGUI::FrameWindow::EventCloseClicked, CEGUI::Event::Subscriber(&EditorScreen::onSaveCancelClick, this));
+        m_saveWindow->setText("Save Level");
+        // Don't let user drag window around
+        m_saveWindow->setDragMovingEnabled(false);
+
+        // Children of saveWindow
+        m_saveWindowCombobox = static_cast<CEGUI::Combobox*>(m_gui.createWidget(m_saveWindow, "TaharezLook/Combobox", glm::vec4(0.1f, 0.1f, 0.8f, 0.4f), glm::vec4(0.0f), "SaveCombobox"));
+        m_saveWindowSaveButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget(m_saveWindow, "TaharezLook/Button", glm::vec4(0.35f, 0.8f, 0.3f, 0.1f), glm::vec4(0.0f), "SaveCancelButton"));
+        m_saveWindowSaveButton->setText("Save");
+        m_saveWindowSaveButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onSave, this));
+
+        // Start disabled
+        m_saveWindow->setAlpha(0.0f);
+        m_saveWindow->disable();
+    }
+
+    { // Add load window widgets
+        m_loadWindow = static_cast<CEGUI::FrameWindow*>(m_gui.createWidget("TaharezLook/FrameWindow", glm::vec4(0.3f, 0.3f, 0.4f, 0.4f), glm::vec4(0.0f), "LoadWindow"));
+        m_loadWindow->subscribeEvent(CEGUI::FrameWindow::EventCloseClicked, CEGUI::Event::Subscriber(&EditorScreen::onLoadCancelClick, this));
+        m_loadWindow->setText("Load Level");
+        // Don't let user drag window around
+        m_loadWindow->setDragMovingEnabled(false);
+
+        // Children of loadWindow
+        m_loadWindowCombobox = static_cast<CEGUI::Combobox*>(m_gui.createWidget(m_loadWindow, "TaharezLook/Combobox", glm::vec4(0.1f, 0.1f, 0.8f, 0.4f), glm::vec4(0.0f), "LoadCombobox"));
+        m_loadWindowLoadButton = static_cast<CEGUI::PushButton*>(m_gui.createWidget(m_loadWindow, "TaharezLook/Button", glm::vec4(0.35f, 0.8f, 0.3f, 0.1f), glm::vec4(0.0f), "LoadCancelButton"));
+        m_loadWindowLoadButton->setText("Load");
+        m_loadWindowLoadButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&EditorScreen::onLoad, this));
+
+        // Start disabled
+        m_loadWindow->setAlpha(0.0f);
+        m_loadWindow->disable();
     }
 
     setLightWidgetVisibility(false);
@@ -788,6 +859,11 @@ bool EditorScreen::isMouseInUI() {
     SDL_GetMouseState(&x, &y);
     const float SW = (float)m_window->getScreenWidth();
     const float SH = (float)m_window->getScreenHeight();
+    // First check save window
+    if (!m_saveWindow->isDisabled() &&
+        x >= m_saveWindow->getXPosition().d_scale * SW && x <= m_saveWindow->getXPosition().d_scale * SW + m_saveWindow->getWidth().d_scale  * SW &&
+        y >= m_saveWindow->getYPosition().d_scale * SH && y <= m_saveWindow->getYPosition().d_scale * SH + m_saveWindow->getHeight().d_scale * SH) return true;
+
     // Notice we aren't converting to world space, we are staying in screen space because UI.
     return (x >= m_groupBox->getXPosition().d_scale * SW && x <= m_groupBox->getXPosition().d_scale * SW + m_groupBox->getWidth().d_scale  * SW &&
             y >= m_groupBox->getYPosition().d_scale * SH && y <= m_groupBox->getYPosition().d_scale * SH + m_groupBox->getHeight().d_scale * SH);
@@ -897,7 +973,72 @@ bool EditorScreen::onPlaceMouseClick(const CEGUI::EventArgs& e) {
 }
 
 bool EditorScreen::onSaveMouseClick(const CEGUI::EventArgs& e) {
-    puts("EditorScreen::onSaveMouseClick() not implemented");
+    // Make sure levels dir exists
+    Bengine::IOManager::makeDirectory("Levels");
+    
+    m_saveWindowCombobox->clearAllSelections();
+
+    // Remove all items
+    for (auto& item : m_saveListBoxItems) {
+        // We don't have to call delete since removeItem does it for us
+        m_saveWindowCombobox->removeItem(item);
+    }
+    m_saveListBoxItems.clear();
+
+    // Get all directory entries
+    std::vector<Bengine::DirEntry> entries;
+    Bengine::IOManager::getDirectoryEntries("Levels", entries);
+    
+
+    // Add all files to list box
+    for (auto& e : entries) {
+        // Don't add directories
+        if (!e.isDirectory) {
+            // Remove "Levels/" substring
+            e.path.erase(0, std::string("Levels/").size());
+            m_saveListBoxItems.push_back(new CEGUI::ListboxTextItem(e.path));
+            m_saveWindowCombobox->addItem(m_saveListBoxItems.back());
+        }
+    }
+
+    m_saveWindow->enable();
+    m_saveWindow->setAlpha(1.0f);
+    m_loadWindow->disable();
+    m_loadWindow->setAlpha(0.0f);
+    return true;
+}
+
+bool EditorScreen::onLoadMouseClick(const CEGUI::EventArgs& e) {
+
+    m_loadWindowCombobox->clearAllSelections();
+
+    // Remove all items
+    for (auto& item : m_loadListBoxItems) {
+        // We don't have to call delete since removeItem does it for us
+        m_loadWindowCombobox->removeItem(item);
+    }
+    m_loadListBoxItems.clear();
+
+    // Get all directory entries
+    std::vector<Bengine::DirEntry> entries;
+    Bengine::IOManager::getDirectoryEntries("Levels", entries);
+
+
+    // Add all files to list box
+    for (auto& e : entries) {
+        // Don't add directories
+        if (!e.isDirectory) {
+            // Remove "Levels/" substring
+            e.path.erase(0, std::string("Levels/").size());
+            m_loadListBoxItems.push_back(new CEGUI::ListboxTextItem(e.path));
+            m_loadWindowCombobox->addItem(m_loadListBoxItems.back());
+        }
+    }
+
+    m_loadWindow->enable();
+    m_loadWindow->setAlpha(1.0f);
+    m_saveWindow->disable();
+    m_saveWindow->setAlpha(0.0f);
     return true;
 }
 
@@ -932,5 +1073,56 @@ bool EditorScreen::onHeightValueChange(const CEGUI::EventArgs& e) {
 
 bool EditorScreen::onDebugToggleClick(const CEGUI::EventArgs& e) {
     m_debugRender = m_debugToggle->isSelected();
+    return true;
+}
+
+bool EditorScreen::onSaveCancelClick(const CEGUI::EventArgs& e) {
+    m_saveWindow->disable();
+    m_saveWindow->setAlpha(0.0f);
+    return true;
+}
+
+bool EditorScreen::onSave(const CEGUI::EventArgs& e) {
+    if (!m_hasPlayer) {
+        puts("Must create player before saving.");
+        return true;
+    }
+
+    puts("Saving game...");
+    // Make sure levels dir exists again, for good measure.
+    Bengine::IOManager::makeDirectory("Levels");
+
+    // Save in text mode
+    std::string text = "Levels/" + std::string(m_saveWindowCombobox->getText().c_str());
+    if (LevelReaderWriter::saveAsText(text, m_player, m_boxes, m_lights)) {
+        m_saveWindow->disable();
+        m_saveWindow->setAlpha(0.0f);
+        puts("File successfully saved.");
+    } else {
+        puts("Failed to save file.");
+    }
+
+    return true;
+}
+
+bool EditorScreen::onLoadCancelClick(const CEGUI::EventArgs& e) {
+    m_loadWindow->disable();
+    m_loadWindow->setAlpha(0.0f);
+    return true;
+}
+
+bool EditorScreen::onLoad(const CEGUI::EventArgs& e) {
+    puts("Loading game...");
+    std::string path = "Levels/" + std::string(m_loadWindowCombobox->getText().c_str());
+
+    clearLevel();
+
+    if (LevelReaderWriter::loadAsText(path, m_world.get(), m_player, m_boxes, m_lights)) {
+        m_hasPlayer = true;
+    }
+    // TODO: Binary file loading/saving
+
+    m_loadWindow->disable();
+    m_loadWindow->setAlpha(0.0f);
     return true;
 }

@@ -1,6 +1,10 @@
 #include "IOManager.h"
 
+#include <filesystem>
 #include <fstream>
+
+// Namespace alias
+namespace fs = std::tr2::sys;
 
 namespace Bengine {
 
@@ -52,4 +56,24 @@ namespace Bengine {
         return true;
     }
 
+    bool IOManager::getDirectoryEntries(const char* path, std::vector<DirEntry>& rvEntries) {
+        auto dpath = fs::path(path);
+        // Must be directory
+        if (!fs::is_directory(dpath)) return false;
+
+        for (auto it = fs::directory_iterator(dpath); it != fs::directory_iterator(); ++it) {
+            rvEntries.emplace_back();
+            rvEntries.back().path = it->path().string();
+            if (is_directory(it->path())) {
+                rvEntries.back().isDirectory = true;
+            } else {
+                rvEntries.back().isDirectory = false;
+            }
+        }
+        return true;
+    }
+
+    bool IOManager::makeDirectory(const char* path) {
+        return fs::create_directory(fs::path(path));
+    }
 }

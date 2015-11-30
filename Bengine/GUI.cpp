@@ -1,3 +1,5 @@
+#include <GL/glew.h> // Include BEFORE GUI.h
+
 #include "GUI.h"
 
 #include <iostream>
@@ -10,22 +12,22 @@ void Bengine::GUI::init(const std::string& resourceDirectory) {
     // Check if the renderer and system were not already initialized
     if (m_renderer == nullptr) {
         m_renderer = &CEGUI::OpenGL3Renderer::bootstrapSystem();
-
-        CEGUI::DefaultResourceProvider* rp = static_cast<CEGUI::DefaultResourceProvider*>(CEGUI::System::getSingleton().getResourceProvider());
-        rp->setResourceGroupDirectory("imagesets", resourceDirectory + "/imagesets/");
-        rp->setResourceGroupDirectory("schemes", resourceDirectory + "/schemes/");
-        rp->setResourceGroupDirectory("fonts", resourceDirectory + "/fonts/");
-        rp->setResourceGroupDirectory("layouts", resourceDirectory + "/layouts/");
-        rp->setResourceGroupDirectory("looknfeels", resourceDirectory + "/looknfeel/");
-        rp->setResourceGroupDirectory("lua_scripts", resourceDirectory + "/lua_scripts/");
-
-        CEGUI::ImageManager::setImagesetDefaultResourceGroup("imagesets");
-        CEGUI::Scheme::setDefaultResourceGroup("schemes");
-        CEGUI::Font::setDefaultResourceGroup("fonts");
-        CEGUI::WidgetLookManager::setDefaultResourceGroup("looknfeels");
-        CEGUI::WindowManager::setDefaultResourceGroup("layouts");
-        CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
     }
+
+    CEGUI::DefaultResourceProvider* rp = static_cast<CEGUI::DefaultResourceProvider*>(CEGUI::System::getSingleton().getResourceProvider());
+    rp->setResourceGroupDirectory("imagesets", resourceDirectory + "/imagesets/");
+    rp->setResourceGroupDirectory("schemes", resourceDirectory + "/schemes/");
+    rp->setResourceGroupDirectory("fonts", resourceDirectory + "/fonts/");
+    rp->setResourceGroupDirectory("layouts", resourceDirectory + "/layouts/");
+    rp->setResourceGroupDirectory("looknfeels", resourceDirectory + "/looknfeel/");
+    rp->setResourceGroupDirectory("lua_scripts", resourceDirectory + "/lua_scripts/");
+
+    CEGUI::ImageManager::setImagesetDefaultResourceGroup("imagesets");
+    CEGUI::Scheme::setDefaultResourceGroup("schemes");
+    CEGUI::Font::setDefaultResourceGroup("fonts");
+    CEGUI::WidgetLookManager::setDefaultResourceGroup("looknfeels");
+    CEGUI::WindowManager::setDefaultResourceGroup("layouts");
+    CEGUI::ScriptModule::setDefaultResourceGroup("lua_scripts");
 
     m_context = &CEGUI::System::getSingleton().createGUIContext(m_renderer->getDefaultRenderTarget());
     m_root = CEGUI::WindowManager::getSingleton().createWindow("DefaultWindow", "root");
@@ -34,13 +36,25 @@ void Bengine::GUI::init(const std::string& resourceDirectory) {
 
 void Bengine::GUI::destroy() {
     CEGUI::System::getSingleton().destroyGUIContext(*m_context);
+    CEGUI::WindowManager::getSingleton().destroyWindow(m_root);
+    m_context = nullptr;
+    m_root = nullptr;
 }
 
 void Bengine::GUI::draw() {
+    glDisable(GL_DEPTH_TEST);
     m_renderer->beginRendering();
     m_context->draw();
     m_renderer->endRendering();
+    // Clean up after CEGUI
+    glBindVertexArray(0);
     glDisable(GL_SCISSOR_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void Bengine::GUI::update() {
@@ -183,6 +197,7 @@ void Bengine::GUI::onSDLEvent(SDL_Event& evnt) {
     CEGUI::utf32 codePoint;
     switch (evnt.type) {
         case SDL_MOUSEMOTION:
+            // m_context->injectMouseMove(evnt.motion.xrel, evnt.motion.yrel);
             m_context->injectMousePosition((float)evnt.motion.x, (float)evnt.motion.y);
             break;
         case SDL_KEYDOWN:
